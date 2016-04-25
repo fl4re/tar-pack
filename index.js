@@ -108,13 +108,17 @@ function unpack(unpackTarget, options, cb) {
     }
     if (0 === --pending) next()
   })
-  rm(unpackTarget, function (er) {
-    if (er) {
-      tarball.emit('error', er)
-      return tarball.end()
-    }
-    if (0 === --pending) next()
-  })
+  if (!options.keepFiles) {
+    rm(unpackTarget, function (er) {
+      if (er) {
+        tarball.emit('error', er)
+        return tarball.end()
+      }
+      if (0 === --pending) next()
+    })
+  } else {
+    next()
+  }
   function next() {
     // gzip {tarball} --decompress --stdout \
     //   | tar -mvxpf - --strip-components=1 -C {unpackTarget}
